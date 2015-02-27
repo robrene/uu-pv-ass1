@@ -1,0 +1,10 @@
+module {CCO.GCL.AG} {}
+{
+import CCO.Component
+}
+
+include "AG/Base.ag"
+
+{
+
+}

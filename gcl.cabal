@@ -16,5 +16,5 @@ extra-source-files:    Makefile
 executable gcl
   main-is:             GCL.hs
   build-depends:       base >= 4 && < 5, uu-cco >= 0.1.0.1, uhc-light >= 1.1.8.3, uhc-util >= 0.1.3.9
-  --other-modules:       CCO.ExWhile, CCO.ExWhile.AG, CCO.ExWhile.Base, CCO.ExWhile.Lexer, CCO.ExWhile.Parser
+  other-modules:       CCO.GCL, CCO.GCL.AG, CCO.GCL.Base
   hs-source-dirs:      src

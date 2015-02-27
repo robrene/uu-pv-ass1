@@ -3,7 +3,10 @@ CABAL-BUILD-FLAGS     :=
 
 all : haskell symlinks
 
-haskell :
+src/CCO/GCL/AG.hs : src/CCO/GCL/AG.ag src/CCO/GCL/AG/Base.ag
+	uuagc -Hdcfws --self -P src/CCO/GCL src/CCO/GCL/AG.ag
+
+haskell : src/CCO/GCL/AG.hs
 	cabal configure $(CABAL-CONFIGURE-FLAGS)
 	cabal build $(CABAL-BUILD-FLAGS)
 

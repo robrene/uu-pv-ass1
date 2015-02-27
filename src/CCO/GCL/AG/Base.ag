@@ -1,0 +1,77 @@
+imports
+{
+import CCO.SourcePos
+}
+
+data Program
+  | Program  name :: {String}  params :: Parameters  code :: Statement
+
+data Statement
+  | Skip
+  | Assert  exp :: Expression
+  | Assume  exp :: Expression
+  | Assignment  tars :: AsgTargets  exps :: Expressions
+  | Return  exp :: Expression
+  | Semicolon  s1 :: Statement  s2 :: Statement
+  | Square  s1 :: Statement  s2 :: Statement
+  | While  inv :: Expression  cond :: Expression  body :: Statement
+  | Var  vars :: Variables  body :: Statement
+
+type Parameters = [Variable]
+
+type Variables = [Variable]
+
+data Variable
+  | Credentialized  cred :: {String}  name :: {String}  ty :: Type
+  | Variable  name :: {String}  ty :: Type
+
+data BoundVariable
+  | BoundVariable  name :: {String}  ty :: Type
+
+type AsgTargets = [AsgTarget]
+
+data AsgTarget
+  | Target  name :: {String}
+  | TargetExp  name :: {String}  exp :: Expression
+
+type Expressions = [Expression]
+
+data Expression
+  | BoolLiteral  val :: {Bool}
+  | IntLiteral  val :: {Int}
+  | Name  name :: {String}
+  | ExpOp  exp1 :: Expression  op :: {BinaryOp}  exp2 :: Expression
+  | Not  exp :: Expression
+  | UninterpretedFunction  name :: {String}  exps :: Expressions
+  | Forall  bvar :: BoundVariable  exp :: Expression
+  | NamedExp  name :: {String}  exp :: Expression
+  | Arrow  exp1 :: Expression  exp2 :: Expression
+
+{
+data BinaryOp = OpPlus
+              | OpMinus
+              | OpTimes
+              | OpDiv
+              | OpOr
+              | OpAnd
+              | OpConjunct
+              | OpDisjunct
+              | OpImply
+              | OpLT
+              | OpLTE
+              | OpGT
+              | OpGTE
+              | OpEquals
+}
+
+data Type
+  | PrimitiveTy  pty :: {PrimitiveType}
+  | ArrayTy  aty :: ArrayType
+
+{
+data PrimitiveType = PTyInt
+                   | PTyBool
+}
+
+data ArrayType
+  | Array  ty :: {PrimitiveType}
