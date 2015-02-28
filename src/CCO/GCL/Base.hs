@@ -2,7 +2,7 @@ module CCO.GCL.Base (
     Name
   , Program (..)
   , Statement (..)
-  , Parameters, Variables
+  , Variables
   , Variable (..)
   , BoundVariable (..)
   , AsgTargets

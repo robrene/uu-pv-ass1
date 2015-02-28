@@ -4,6 +4,7 @@ import CCO.Component
 }
 
 include "AG/Base.ag"
+include "AG/RenameVars.ag"
 
 {
 

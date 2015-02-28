@@ -26,8 +26,8 @@ type Parameters = [Variable]
 type Variables = [Variable]
 
 data Variable
-  | Credentialized  cred :: {Integer}  name :: {Name}  ty :: Type
   | Variable  name :: {Name}  ty :: Type
+  | Credentialized  cred :: {Integer}  name :: {Name}  ty :: Type
 
 data BoundVariable
   | BoundVariable  name :: {Name}  ty :: Type

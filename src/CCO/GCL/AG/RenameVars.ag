@@ -1,0 +1,113 @@
+imports
+{
+import qualified Data.Map as M
+}
+
+{
+-- M.insert :: Ord k => k -> a -> Map k a -> Map k a
+flipInsert :: Ord k => a -> k -> Map k a -> Map k a
+flipInsert a k m = M.insert k a m
+}
+
+-- Collect all variable names in a convenient list for Variables.
+attr Variables Variable
+  syn varNames use {++} {[]} :: {[Name]}
+
+sem Variable
+  | Variable       lhs.varNames = [@name]
+  | Credentialized lhs.varNames = [@name]
+
+-- Rename all variable names from "x" to "x$n", where n is the depth of nested
+-- Var statements. Keep map of substitutions so all nodes can apply them.
+attr Program
+  syn varDepth      :: {Int}
+  syn substitutions :: {M.Map Name Int}
+
+attr Statement Variables Variable BoundVariable AsgTargets AsgTarget Expressions Expression Type ArrayType
+  inh varDepth      :: {Int}
+  inh substitutions :: {M.Map Name Int}
+
+sem Program
+  | Program loc.varDepth = 0
+            loc.substitutions = foldr (flipInsert @varDepth) M.empty @params.varNames
+            -- TODO auto copy?
+
+sem Statement
+  | Var loc.varDepth      = @lhs.varDepth + 1
+        loc.newSubs       = foldr (flipInsert @varDepth) M.empty @vars.varNames
+        loc.substitutions = M.union @newSubs @lhs.substitutions
+
+{
+rename :: (M.Map Name Int) -> Name -> Name
+rename m n = rename' (M.lookup n m) n
+  where rename' (Just i) n = n ++ "$" ++ (show i)
+        rename' Nothing n  = n -- Error? Feedback?
+}
+
+-- Store node with renaming scheme applied in a new attribute.
+attr Program Statement Variable BoundVariable AsgTarget Expression
+  syn renamed :: self
+
+sem Program
+  | Program loc.renamed = Program @name @params.renamed @code.renamed
+
+sem Statement
+  | Skip       loc.renamed = Skip
+  | Assert     loc.renamed = Assert @exp.renamed
+  | Assume     loc.renamed = Assume @exp.renamed
+  | Assignment loc.renamed = Assignment @tars.renamedL @exps.renamedL
+  | Return     loc.renamed = Return @exp.renamed
+  | Seq        loc.renamed = Seq @s1.renamed @s2.renamed
+  | Square     loc.renamed = Square @s1.renamed @s2.renamed
+  | While      loc.renamed = While @inv.renamed @cond.renamed @body.renamed
+  | Var        loc.renamed = Var @vars.renamedL @body.renamed
+
+sem Variable
+  | *              loc.newName = rename @lhs.substitutions @name
+  | Variable       loc.renamed = Variable @newName @ty.copy
+  | Credentialized loc.renamed = Credentialized @cred @newName @name
+
+sem BoundVariable
+  | BoundVariable loc.newName = rename @lhs.substitutions @name
+                  loc.renamed = BoundVariable @newName @ty.copy
+
+sem Expression
+  | BoolLiteral loc.renamed = BoolLiteral @val
+  | IntLiteral  loc.renamed = IntLiteral @val
+  | Name        loc.renamed = Name $ rename @lhs.substitutions @name
+  | ExpOp       loc.renamed = ExpOp @exp1.renamed @op @exp2.renamed
+  | Not         loc.renamed = Not @exp.renamed
+  | UnFunc      loc.renamed = UnFunc @name @exps.renamedL
+  | Forall      loc.renamed = Forall @bvar.renamed @exp.renamed
+  | NamedExp    loc.renamed = NamedExp @name @exp.renamed
+  | IfThenElse  loc.renamed = IfThenElse @cond.renamed @exp1.renamed @exp2.renamed
+
+-- Use special attribute for list types.
+attr Variables Variable
+  syn renamedL use {++} {[]} :: Variables
+
+sem Variable
+  | * lhs.renamedL = [@renamed]
+
+attr AsgTargets AsgTarget
+  syn renamedL use {++} {[]} :: AsgTargets
+
+sem AsgTarget
+  | * lhs.renamedL = [@renamed]
+
+attr Expressions Expression
+  syn renamedL use {++} {[]} :: Expressions
+
+sem Expression
+  | * lhs.renamedL = [@renamed]
+
+-- Copy types so they can be referred to.
+attr Type ArrayType
+  syn copy :: self
+
+sem Type
+  | PrimitiveTy lhs.copy = PrimitiveType @pty
+  | ArrayTy     lhs.copy = ArrayTy @aty.copy
+
+sem ArrayType
+  | Array lhs.copy = Array @ty

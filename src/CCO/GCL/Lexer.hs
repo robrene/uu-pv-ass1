@@ -80,7 +80,7 @@ keyword_ = fmap Keyword $ string "skip"
 
 -- | A 'Lexer' that recognises 'Name' tokens.
 name_ :: Lexer Token
-name_ = Name <$> some (alpha <|> char '_')
+name_ = (\c cs -> Name (c:cs)) <$> (alpha <|> char '_') <*> many (alphaNum <|> char '_')
 
 -- | A 'Lexer' that recognises 'Nat' tokens.
 nat_ :: Lexer Token
