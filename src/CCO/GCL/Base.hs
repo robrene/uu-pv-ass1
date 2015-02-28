@@ -92,8 +92,9 @@ instance Tree Expression where
                                               , fromTree exp ]
   fromTree (NamedExp name exp) = T.App "NamedExp" [ fromTree name
                                                   , fromTree exp ]
-  fromTree (Arrow exp1 exp2) = T.App "Arrow" [ fromTree exp1,
-                                             , fromTree exp2 ]
+  fromTree (IfThenElse cond exp1 exp2) = T.App "IfThenElse" [ fromTree cond
+                                                            , fromTree exp1
+                                                            , fromTree exp2 ]
   toTree = parseTree [ app "BoolLiteral" (BoolLiteral <$> arg)
                      , app "IntLiteral" (IntLiteral <$> arg)
                      , app "Name" (Name <$> arg)
@@ -102,7 +103,7 @@ instance Tree Expression where
                      , app "UninterpretedFunction" (UninterpretedFunction <$> arg <*> arg)
                      , app "Forall" (Forall <$> arg <*> arg)
                      , app "NamedExp" (NamedExp <$> arg <*> arg)
-                     , app "Arrow" (Arrow <$> arg <*> arg)
+                     , app "IfThenElse" (IfThenElse <$> arg <*> arg <*> arg)
                      ]
 
 instance Tree BinaryOp where

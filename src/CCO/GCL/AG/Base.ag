@@ -45,7 +45,7 @@ data Expression
   | UninterpretedFunction  name :: {String}  exps :: Expressions
   | Forall  bvar :: BoundVariable  exp :: Expression
   | NamedExp  name :: {String}  exp :: Expression
-  | Arrow  exp1 :: Expression  exp2 :: Expression
+  | IfThenElse  cond :: Expression  exp1 :: Expression  exp2 :: Expression
 
 {
 data BinaryOp = OpPlus
