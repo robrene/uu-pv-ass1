@@ -1,6 +1,6 @@
 module CCO.GCL (
-    -- * Syntax
-    Program (..)
+    Name
+  , Program (..)
   , Statement (..)
   , Parameters, Variables
   , Variable (..)
@@ -13,6 +13,8 @@ module CCO.GCL (
   , Type (..)
   , PrimitiveType (..)
   , ArrayType (..)
+  , parser
 ) where
 
 import CCO.GCL.Base
+import CCO.GCL.Parser

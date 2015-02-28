@@ -3,8 +3,12 @@ imports
 import CCO.SourcePos
 }
 
+{
+type Name = String
+}
+
 data Program
-  | Program  name :: {String}  params :: Parameters  code :: Statement
+  | Program  name :: {Name}  params :: Parameters  code :: Statement
 
 data Statement
   | Skip
@@ -22,29 +26,29 @@ type Parameters = [Variable]
 type Variables = [Variable]
 
 data Variable
-  | Credentialized  cred :: {String}  name :: {String}  ty :: Type
-  | Variable  name :: {String}  ty :: Type
+  | Credentialized  cred :: {Integer}  name :: {Name}  ty :: Type
+  | Variable  name :: {Name}  ty :: Type
 
 data BoundVariable
-  | BoundVariable  name :: {String}  ty :: Type
+  | BoundVariable  name :: {Name}  ty :: Type
 
 type AsgTargets = [AsgTarget]
 
 data AsgTarget
-  | Target  name :: {String}
-  | TargetExp  name :: {String}  exp :: Expression
+  | Target  name :: {Name}
+  | TargetExp  name :: {Name}  exp :: Expression
 
 type Expressions = [Expression]
 
 data Expression
   | BoolLiteral  val :: {Bool}
   | IntLiteral  val :: {Int}
-  | Name  name :: {String}
+  | Name  name :: {Name}
   | ExpOp  exp1 :: Expression  op :: {BinaryOp}  exp2 :: Expression
   | Not  exp :: Expression
-  | UninterpretedFunction  name :: {String}  exps :: Expressions
+  | UninterpretedFunction  name :: {Name}  exps :: Expressions
   | Forall  bvar :: BoundVariable  exp :: Expression
-  | NamedExp  name :: {String}  exp :: Expression
+  | NamedExp  name :: {Name}  exp :: Expression
   | IfThenElse  cond :: Expression  exp1 :: Expression  exp2 :: Expression
 
 {

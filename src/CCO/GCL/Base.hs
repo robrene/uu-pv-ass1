@@ -1,6 +1,6 @@
 module CCO.GCL.Base (
-    -- * Syntax
-    Program (..)
+    Name
+  , Program (..)
   , Statement (..)
   , Parameters, Variables
   , Variable (..)
@@ -26,9 +26,10 @@ import Control.Applicative        (Applicative ((<*>)), (<$>), pure)
 -------------------------------------------------------------------------------
 
 instance Tree Program where
-  fromTree (Program name params) = T.App "Program" [ fromTree name
-                                                   , fromTree params ]
-  toTree = parseTree [ app "Program" (Program <$> arg <*> arg) ]
+  fromTree (Program name params code) = T.App "Program" [ fromTree name
+                                                        , fromTree params
+                                                        , fromTree code ]
+  toTree = parseTree [ app "Program" (Program <$> arg <*> arg <*> arg) ]
 
 instance Tree Statement where
   fromTree (Skip) = T.App "Skip" []
@@ -66,7 +67,7 @@ instance Tree Variable where
   toTree = parseTree [ app "Credentialized" (Credentialized <$> arg <*> arg <*> arg)
                      , app "Variable" (Variable <$> arg <*> arg) ]
 
-instance Tree BoundsVariable where
+instance Tree BoundVariable where
   fromTree (BoundVariable name ty) = T.App "BoundVariable" [ fromTree name
                                                            , fromTree ty ]
   toTree = parseTree [ app "BoundVariable" (BoundVariable <$> arg <*> arg) ]
