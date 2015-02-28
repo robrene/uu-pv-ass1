@@ -16,7 +16,7 @@ data Statement
   | Assume  exp :: Expression
   | Assignment  tars :: AsgTargets  exps :: Expressions
   | Return  exp :: Expression
-  | Semicolon  s1 :: Statement  s2 :: Statement
+  | Seq  s1 :: Statement  s2 :: Statement
   | Square  s1 :: Statement  s2 :: Statement
   | While  inv :: Expression  cond :: Expression  body :: Statement
   | Var  vars :: Variables  body :: Statement
@@ -46,7 +46,7 @@ data Expression
   | Name  name :: {Name}
   | ExpOp  exp1 :: Expression  op :: {BinaryOp}  exp2 :: Expression
   | Not  exp :: Expression
-  | UninterpretedFunction  name :: {Name}  exps :: Expressions
+  | UnFunc  name :: {Name}  exps :: Expressions
   | Forall  bvar :: BoundVariable  exp :: Expression
   | NamedExp  name :: {Name}  exp :: Expression
   | IfThenElse  cond :: Expression  exp1 :: Expression  exp2 :: Expression

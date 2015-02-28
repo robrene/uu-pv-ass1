@@ -28,7 +28,7 @@ pProgram = (\name params code -> Program name params code)
 pStatement :: TokenParser Statement
 pStatement = spec '{' *> pStatement <* spec '}'
          <|> pStatement'
-         <|> (\s1 s2 -> Semicolon s1 s2)
+         <|> (\s1 s2 -> Seq s1 s2)
          <$> pStatement' <* spec ';' <*> pStatement
          <|> (\s1 s2 -> Square s1 s2)
          <$> pStatement' <* spec '[' <* spec ']' <*> pStatement
@@ -80,7 +80,7 @@ pSimpleExpression' = (BoolLiteral True) <$ keyword "true"
                  <|> (\val -> IntLiteral val) <$> nat
                  <|> (\name -> Name name) <$> name
                  <|> (\exp -> Not exp) <$ keyword "not" <*> pExpression
-                 <|> (\name exps -> UninterpretedFunction name exps)
+                 <|> (\name exps -> UnFunc name exps)
                  <$> name <* spec '(' <*> many pExpression <* spec ')'
                  <|> (\bvar exp -> Forall bvar exp)
                  <$  spec '(' <* keyword "forall" <*> pBoundVariable

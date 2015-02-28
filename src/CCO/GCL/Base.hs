@@ -38,8 +38,8 @@ instance Tree Statement where
   fromTree (Assignment tars exps) = T.App "Assignment" [ fromTree tars
                                                        , fromTree exps ]
   fromTree (Return exp) = T.App "Return" [ fromTree exp ]
-  fromTree (Semicolon s1 s2) = T.App "Semicolon" [ fromTree s1
-                                                 , fromTree s2 ]
+  fromTree (Seq s1 s2) = T.App "Seq" [ fromTree s1
+                                     , fromTree s2 ]
   fromTree (Square s1 s2) = T.App "Square" [ fromTree s1
                                            , fromTree s2 ]
   fromTree (While inv cond body) = T.App "While" [ fromTree inv
@@ -52,7 +52,7 @@ instance Tree Statement where
                      , app "Assume" (Assume <$> arg)
                      , app "Assignment" (Assignment <$> arg <*> arg)
                      , app "Return" (Return <$> arg)
-                     , app "Semicolon" (Semicolon <$> arg <*> arg)
+                     , app "Seq" (Seq <$> arg <*> arg)
                      , app "Square" (Square <$> arg <*> arg)
                      , app "While" (While <$> arg <*> arg <*> arg)
                      , app "Var" (Var <$> arg <*> arg)
@@ -87,8 +87,8 @@ instance Tree Expression where
                                                 , fromTree op
                                                 , fromTree exp2 ]
   fromTree (Not exp) = T.App "Not" [ fromTree exp ]
-  fromTree (UninterpretedFunction name exps) = T.App "UninterpretedFunction" [ fromTree name
-                                                                             , fromTree exps ]
+  fromTree (UnFunc name exps) = T.App "UnFunc" [ fromTree name
+                                               , fromTree exps ]
   fromTree (Forall bvar exp) = T.App "Forall" [ fromTree bvar
                                               , fromTree exp ]
   fromTree (NamedExp name exp) = T.App "NamedExp" [ fromTree name
@@ -101,7 +101,7 @@ instance Tree Expression where
                      , app "Name" (Name <$> arg)
                      , app "ExpOp" (ExpOp <$> arg <*> arg <*> arg)
                      , app "Not" (Not <$> arg)
-                     , app "UninterpretedFunction" (UninterpretedFunction <$> arg <*> arg)
+                     , app "UnFunc" (UnFunc <$> arg <*> arg)
                      , app "Forall" (Forall <$> arg <*> arg)
                      , app "NamedExp" (NamedExp <$> arg <*> arg)
                      , app "IfThenElse" (IfThenElse <$> arg <*> arg <*> arg)
