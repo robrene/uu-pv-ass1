@@ -30,7 +30,6 @@ attr Statement Variables Variable BoundVariable AsgTargets AsgTarget Expressions
 sem Program
   | Program loc.varDepth = 0
             loc.substitutions = foldr (flipInsert @varDepth) M.empty @params.varNames
-            -- TODO auto copy?
 
 sem Statement
   | Var loc.varDepth      = @lhs.varDepth + 1
