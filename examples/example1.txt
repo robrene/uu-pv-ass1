@@ -1,6 +1,6 @@
 var x:int in
   assume x>0 ;
   inv  x>=0 while x>0 do { x := x-1 } ;
-  r := x ;
-  assert r=0
+  return x ;
+  assert returned=0
 end

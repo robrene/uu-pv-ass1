@@ -13,6 +13,7 @@ module CCO.GCL.Base (
   , Type (..)
   , PrimitiveType (..)
   , ArrayType (..)
+  , renameVars
 ) where
 
 import CCO.GCL.AG

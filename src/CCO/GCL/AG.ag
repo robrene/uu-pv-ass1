@@ -7,5 +7,6 @@ include "AG/Base.ag"
 include "AG/RenameVars.ag"
 
 {
-
+renameVars :: Component Program Program
+renameVars = component $ \pr -> return $ renamed_Syn_Program (wrap_Program (sem_Program pr) Inh_Program)
 }

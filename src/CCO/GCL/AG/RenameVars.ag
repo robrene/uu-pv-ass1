@@ -4,8 +4,8 @@ import qualified Data.Map as M
 }
 
 {
--- M.insert :: Ord k => k -> a -> Map k a -> Map k a
-flipInsert :: Ord k => a -> k -> Map k a -> Map k a
+-- M.insert :: Ord k => k -> a -> M.Map k a -> M.Map k a
+flipInsert :: Ord k => a -> k -> M.Map k a -> M.Map k a
 flipInsert a k m = M.insert k a m
 }
 
@@ -14,8 +14,8 @@ attr Variables Variable
   syn varNames use {++} {[]} :: {[Name]}
 
 sem Variable
-  | Variable       lhs.varNames = [@name]
-  | Credentialized lhs.varNames = [@name]
+  | Variable       loc.varNames = [@name]
+  | Credentialized loc.varNames = [@name]
 
 -- Rename all variable names from "x" to "x$n", where n is the depth of nested
 -- Var statements. Keep map of substitutions so all nodes can apply them.
@@ -49,7 +49,7 @@ attr Program Statement Variable BoundVariable AsgTarget Expression
   syn renamed :: self
 
 sem Program
-  | Program loc.renamed = Program @name @params.renamed @code.renamed
+  | Program loc.renamed = Program @name @params.renamedL @code.renamed
 
 sem Statement
   | Skip       loc.renamed = Skip
@@ -65,11 +65,16 @@ sem Statement
 sem Variable
   | *              loc.newName = rename @lhs.substitutions @name
   | Variable       loc.renamed = Variable @newName @ty.copy
-  | Credentialized loc.renamed = Credentialized @cred @newName @name
+  | Credentialized loc.renamed = Credentialized @cred @newName @ty.copy
 
 sem BoundVariable
   | BoundVariable loc.newName = rename @lhs.substitutions @name
                   loc.renamed = BoundVariable @newName @ty.copy
+
+sem AsgTarget
+  | *         loc.newName = rename @lhs.substitutions @name
+  | Target    loc.renamed = Target @newName
+  | TargetExp loc.renamed = TargetExp @newName @exp.renamed
 
 sem Expression
   | BoolLiteral loc.renamed = BoolLiteral @val
@@ -106,7 +111,7 @@ attr Type ArrayType
   syn copy :: self
 
 sem Type
-  | PrimitiveTy lhs.copy = PrimitiveType @pty
+  | PrimitiveTy lhs.copy = PrimitiveTy @pty
   | ArrayTy     lhs.copy = ArrayTy @aty.copy
 
 sem ArrayType
