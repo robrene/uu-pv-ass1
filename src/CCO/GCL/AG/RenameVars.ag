@@ -23,7 +23,7 @@ attr Program
   syn varDepth      :: {Int}
   syn substitutions :: {M.Map Name Int}
 
-attr Statement Variables Variable BoundVariable AsgTargets AsgTarget Expressions Expression Type ArrayType
+attr Statement Variables Variable BoundVariable AsgTarget Expressions Expression Type ArrayType
   inh varDepth      :: {Int}
   inh substitutions :: {M.Map Name Int}
 
@@ -54,7 +54,7 @@ sem Statement
   | Skip       loc.renamed = Skip
   | Assert     loc.renamed = Assert @exp.renamed
   | Assume     loc.renamed = Assume @exp.renamed
-  | Assignment loc.renamed = Assignment @tars.renamedL @exps.renamedL
+  | Assignment loc.renamed = Assignment @tar.renamed @exp.renamed
   | Return     loc.renamed = Return @exp.renamed
   | Seq        loc.renamed = Seq @s1.renamed @s2.renamed
   | Square     loc.renamed = Square @s1.renamed @s2.renamed
@@ -73,7 +73,7 @@ sem BoundVariable
 sem AsgTarget
   | *         loc.newName = rename @lhs.substitutions @name
   | Target    loc.renamed = Target @newName
-  | TargetExp loc.renamed = TargetExp @newName @exp.renamed
+  | TargetArr loc.renamed = TargetArr @newName @idx.renamed
 
 sem Expression
   | BoolLiteral loc.renamed = BoolLiteral @val
@@ -81,9 +81,9 @@ sem Expression
   | Name        loc.renamed = Name $ rename @lhs.substitutions @name
   | ExpOp       loc.renamed = ExpOp @exp1.renamed @op @exp2.renamed
   | Not         loc.renamed = Not @exp.renamed
-  | UnFunc      loc.renamed = UnFunc @name @exps.renamedL
+  | UnFunc      loc.renamed = UnFunc @name @params.renamedL
   | Forall      loc.renamed = Forall @bvar.renamed @exp.renamed
-  | NamedExp    loc.renamed = NamedExp @name @exp.renamed
+  | ArrAccess   loc.renamed = ArrAccess @name @idx.renamed
   | IfThenElse  loc.renamed = IfThenElse @cond.renamed @exp1.renamed @exp2.renamed
 
 -- Use special attribute for list types.
@@ -91,12 +91,6 @@ attr Variables Variable
   syn renamedL use {++} {[]} :: Variables
 
 sem Variable
-  | * lhs.renamedL = [@renamed]
-
-attr AsgTargets AsgTarget
-  syn renamedL use {++} {[]} :: AsgTargets
-
-sem AsgTarget
   | * lhs.renamedL = [@renamed]
 
 attr Expressions Expression

@@ -1,0 +1,83 @@
+imports
+{
+}
+
+attr Statement
+  inh postQ :: {Expression}
+  syn wlp   :: {Expression}
+  syn hasReturned :: {Bool}
+
+sem Statement
+  | *          loc.hasReturned = False
+
+  -- wlp skip Q = Q
+  | Skip       loc.wlp = @postQ
+
+  -- wlp (assert P) Q = P /\ Q
+  | Assert     loc.wlp = ExpOp @exp OpConjunct @postQ
+
+  -- wlp (assume P) Q = P => Q
+  | Assume     loc.wlp = ExpOp @exp OpImply @postQ
+
+  -- wlp (x := e) Q = Q[e/x]
+  -- wlp (a[i] := e) Q = Q[a(i repby e)/a]
+  | Assignment loc.wlp = subst @exp @tar @postQ
+
+  -- wlp (return _) Q = Q, and mark the fact for control flow.
+  | Return     loc.wlp = @postQ
+               lhs.hasReturned = True
+
+  -- wlp (s1 ; s2) Q = wlp s1 (wlp s2 Q)
+  -- Unless s1 is a return statement: wlp (return _ ; s2) Q = Q
+  | Seq        s1.postQ = if @s1.hasReturned then @lhs.postQ else @s2.wlp
+               loc.wlp  = @s1.wlp
+
+  -- wlp (s1 [] s2) Q = wlp s1 Q /\ wlp s2 Q
+  | Square     loc.wlp = ExpOp @s1.wlp OpConjunct @s2.wlp
+
+  --                            { I,          provided I /\ not g => Q
+  -- wlp (inv I while g do S) = {             and I /\ g => wlp S I
+  --                            { not g /\ Q, otherwise
+  | While      body.postQ    = @inv  -- @body.wlp ~= wlp S I
+               loc.reqs_g    = ExpOp (ExpOp @inv OpConjunct @cond) OpImply @body.wlp  -- I /\ g => wlp S I
+               loc.reqs_ng   = ExpOp (ExpOp @inv OpConjunct (Not @cond)) OpImply @postQ  -- I /\ not g => Q
+               loc.reqs      = ExpOp @reqs_g OpAnd @reqs_ng  -- "provided (..) and (..)"
+               loc.otherwise = ExpOp (Not @cond) OpConjunt @postQ
+               loc.wlp       = IfThenElse @reqs @inv @otherwise
+
+  -- wlp (var x in S end) Q = (forall x :: wlp S Q)
+  | Var        loc.wlp = chainForalls @vars @body.wlp
+
+{
+-- subst e t Q      ~= "substitute occurrences of t in Q with e"
+-- subst e "x" Q    ~= Q[e/x]
+-- subst e "a[i]" Q ~= Q[a(i repby e)/a]
+subst :: Expression -> AsgTarget -> Expression -> Expression
+-- Actual substitutions:
+subst e (Target x) (Name n)
+  | x == n      = e
+subst e t@(TargetArr a i) arr@(ArrAccess a' i')
+  | a == a'     = IfThenElse sameIdx e arr
+  | otherwise   = ArrAccess a' $ subst e t i'
+    where sameIdx = ExpOp i1 OpEquals i
+-- Recursion into substructures:
+subst e t (ExpOp e1 op e2)     = ExpOp e1' op e2'
+  where e1' = subst e t e1
+        e2' = subst e t e2
+subst e t (Not e1)             = Not $ subst e t e1
+subst e t (UnFunc n ps)        = UnFunc n $ map (subst e x) ps
+subst e t (Forall bv e1)       = undefined  -- TODO
+subst e t (IfThenElse c e1 e2) = IfThenElse c' e1' e2'
+  where c'  = subst e t c
+        e1' = subst e t e1
+        e2' = subst e t e2'
+subst _ _ q                    = q
+
+chainForalls :: Variables -> Expression -> Expression
+chainForalls []     = id
+chainForalls (v:vs) = Forall (asBoundVariable v) $ chainForalls vs
+
+asBoundVariable :: Variable -> BoundVariable
+asBoundVariable (Variable name ty) = BoundVariable name ty
+asBoundVariable (Credentialized cred name ty) = BoundVariable name ty
+}

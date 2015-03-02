@@ -16,13 +16,16 @@ type TokenParser = Parser Token
 -- Parser
 -------------------------------------------------------------------------------
 
+manySepByComma :: TokenParser a -> TokenParser [a]
+manySepByComma = manySepBy (spec ',')
+
 -- A 'Component' for parsing terms.
 parser :: Component String Program
 parser = C.parser lexer (pProgram <* eof)
 
 pProgram :: TokenParser Program
 pProgram = (\name params code -> Program name params code)
-       <$> name <* spec '(' <*> many pVariable <* spec ')' <*> pStatement
+       <$> name <* spec '(' <*> manySepByComma pVariable <* spec ')' <*> pStatement
        <|> (\code -> Program "unnamed" [] code) <$> pStatement
 
 pStatement :: TokenParser Statement
@@ -37,15 +40,15 @@ pStatement' :: TokenParser Statement
 pStatement' = (Skip) <$ keyword "skip"
           <|> (\exp -> Assert exp) <$ keyword "assert" <*> pExpression
           <|> (\exp -> Assume exp) <$ keyword "assume" <*> pExpression
-          <|> (\tars exps -> Assignment tars exps)
-          <$> many pAsgTarget <* spec ':' <* spec '=' <*> many pExpression
+          <|> (\tar exp -> Assignment tar exp)
+          <$> pAsgTarget <* spec ':' <* spec '=' <*> pExpression
           <|> (\exp -> Return exp) <$ keyword "return" <*> pExpression
           <|> (\inv cond body -> While inv cond body)
           <$  keyword "inv" <*> pExpression
           <* keyword "while" <*> pExpression
           <* keyword "do" <*> pStatement
           <|> (\vars body -> Var vars body)
-          <$  keyword "var" <*> many pVariable
+          <$  keyword "var" <*> manySepByComma pVariable
           <* keyword "in" <*> pStatement <* keyword "end"
 
 pVariable :: TokenParser Variable
@@ -58,7 +61,7 @@ pBoundVariable = (\name ty -> BoundVariable name ty)
 
 pAsgTarget :: TokenParser AsgTarget
 pAsgTarget = (\name -> Target name) <$> name
-         <|> (\name exp -> TargetExp name exp)
+         <|> (\name idx -> TargetArr name idx)
          <$> name <* spec '[' <*> pExpression <* spec ']'
 
 pExpression :: TokenParser Expression
@@ -80,12 +83,12 @@ pSimpleExpression' = (BoolLiteral True) <$ keyword "true"
                  <|> (\val -> IntLiteral val) <$> nat
                  <|> (\name -> Name name) <$> name
                  <|> (\exp -> Not exp) <$ keyword "not" <*> pExpression
-                 <|> (\name exps -> UnFunc name exps)
-                 <$> name <* spec '(' <*> many pExpression <* spec ')'
+                 <|> (\name params -> UnFunc name params)
+                 <$> name <* spec '(' <*> manySepByComma pExpression <* spec ')'
                  <|> (\bvar exp -> Forall bvar exp)
                  <$  spec '(' <* keyword "forall" <*> pBoundVariable
                  <*  spec ':' <* spec ':' <*> pExpression <* spec ')'
-                 <|> (\name exp -> NamedExp name exp)
+                 <|> (\name idx -> ArrAccess name idx)
                  <$> name <* spec '[' <*> pExpression <* spec ']'
 
 pBinaryOp :: TokenParser BinaryOp

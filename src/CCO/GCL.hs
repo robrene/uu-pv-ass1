@@ -5,7 +5,6 @@ module CCO.GCL (
   , Variables
   , Variable (..)
   , BoundVariable (..)
-  , AsgTargets
   , AsgTarget (..)
   , Expressions
   , Expression (..)
@@ -13,9 +12,9 @@ module CCO.GCL (
   , Type (..)
   , PrimitiveType (..)
   , ArrayType (..)
-  , parser
   , renameVars
+  , wlp
 ) where
 
 import CCO.GCL.Base
-import CCO.GCL.Parser
+import CCO.GCL.AG

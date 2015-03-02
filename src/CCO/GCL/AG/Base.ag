@@ -14,7 +14,7 @@ data Statement
   | Skip
   | Assert  exp :: Expression
   | Assume  exp :: Expression
-  | Assignment  tars :: AsgTargets  exps :: Expressions
+  | Assignment  tar :: AsgTarget  exp :: Expression
   | Return  exp :: Expression
   | Seq  s1 :: Statement  s2 :: Statement
   | Square  s1 :: Statement  s2 :: Statement
@@ -30,11 +30,9 @@ data Variable
 data BoundVariable
   | BoundVariable  name :: {Name}  ty :: Type
 
-type AsgTargets = [AsgTarget]
-
 data AsgTarget
   | Target  name :: {Name}
-  | TargetExp  name :: {Name}  exp :: Expression
+  | TargetArr  name :: {Name}  idx :: Expression
 
 type Expressions = [Expression]
 
@@ -44,9 +42,9 @@ data Expression
   | Name  name :: {Name}
   | ExpOp  exp1 :: Expression  op :: {BinaryOp}  exp2 :: Expression
   | Not  exp :: Expression
-  | UnFunc  name :: {Name}  exps :: Expressions
+  | UnFunc  name :: {Name}  params :: Expressions
   | Forall  bvar :: BoundVariable  exp :: Expression
-  | NamedExp  name :: {Name}  exp :: Expression
+  | ArrAccess  name :: {Name}  idx :: Expression
   | IfThenElse  cond :: Expression  exp1 :: Expression  exp2 :: Expression
 
 {

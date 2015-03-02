@@ -5,7 +5,6 @@ module CCO.GCL.Base (
   , Variables
   , Variable (..)
   , BoundVariable (..)
-  , AsgTargets
   , AsgTarget (..)
   , Expressions
   , Expression (..)
@@ -13,7 +12,6 @@ module CCO.GCL.Base (
   , Type (..)
   , PrimitiveType (..)
   , ArrayType (..)
-  , renameVars
 ) where
 
 import CCO.GCL.AG
@@ -75,10 +73,10 @@ instance Tree BoundVariable where
 
 instance Tree AsgTarget where
   fromTree (Target name) = T.App "Target" [ fromTree name ]
-  fromTree (TargetExp name exp) = T.App "TargetExp" [ fromTree name
+  fromTree (TargetArr name exp) = T.App "TargetArr" [ fromTree name
                                                     , fromTree exp ]
   toTree = parseTree [ app "Target" (Target <$> arg)
-                     , app "TargetExp" (TargetExp <$> arg <*> arg) ]
+                     , app "TargetArr" (TargetArr <$> arg <*> arg) ]
 
 instance Tree Expression where
   fromTree (BoolLiteral val) = T.App "BoolLiteral" [ fromTree val ]
@@ -92,8 +90,8 @@ instance Tree Expression where
                                                , fromTree exps ]
   fromTree (Forall bvar exp) = T.App "Forall" [ fromTree bvar
                                               , fromTree exp ]
-  fromTree (NamedExp name exp) = T.App "NamedExp" [ fromTree name
-                                                  , fromTree exp ]
+  fromTree (ArrAccess name exp) = T.App "ArrAccess" [ fromTree name
+                                                    , fromTree exp ]
   fromTree (IfThenElse cond exp1 exp2) = T.App "IfThenElse" [ fromTree cond
                                                             , fromTree exp1
                                                             , fromTree exp2 ]
@@ -104,7 +102,7 @@ instance Tree Expression where
                      , app "Not" (Not <$> arg)
                      , app "UnFunc" (UnFunc <$> arg <*> arg)
                      , app "Forall" (Forall <$> arg <*> arg)
-                     , app "NamedExp" (NamedExp <$> arg <*> arg)
+                     , app "ArrAccess" (ArrAccess <$> arg <*> arg)
                      , app "IfThenElse" (IfThenElse <$> arg <*> arg <*> arg)
                      ]
 
