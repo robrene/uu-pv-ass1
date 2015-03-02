@@ -1,6 +1,6 @@
-var x:int in
+var x:int, rv:int in
   assume x>0 ;
   inv  x>=0 while x>0 do { x := x-1 } ;
-  return x ;
-  assert returned=0
+  rv := x ;
+  assert rv=0
 end

@@ -53,25 +53,31 @@ sem Statement
 -- subst e "x" Q    ~= Q[e/x]
 -- subst e "a[i]" Q ~= Q[a(i repby e)/a]
 subst :: Expression -> AsgTarget -> Expression -> Expression
+subst e t q = smartSubst [] e t q
+
+-- Like subst, but with an ignore list.
+smartSubst :: [Name] -> Expression -> AsgTarget -> Expression -> Expression
 -- Actual substitutions:
-subst e (Target x) (Name n)
-  | x == n      = e
-subst e t@(TargetArr a i) arr@(ArrAccess a' i')
+smartSubst ls e (Target x) name@(Name n)
+  | x == n && x `notElem` ls = e
+  | otherwise                = name
+smartSubst ls e t@(TargetArr a i) arr@(ArrAccess a' i')
   | a == a'     = IfThenElse sameIdx e arr
-  | otherwise   = ArrAccess a' $ subst e t i'
+  | otherwise   = ArrAccess a' $ smartSubst ls e t i'
     where sameIdx = ExpOp i1 OpEquals i
 -- Recursion into substructures:
-subst e t (ExpOp e1 op e2)     = ExpOp e1' op e2'
-  where e1' = subst e t e1
-        e2' = subst e t e2
-subst e t (Not e1)             = Not $ subst e t e1
-subst e t (UnFunc n ps)        = UnFunc n $ map (subst e x) ps
-subst e t (Forall bv e1)       = undefined  -- TODO
-subst e t (IfThenElse c e1 e2) = IfThenElse c' e1' e2'
-  where c'  = subst e t c
-        e1' = subst e t e1
-        e2' = subst e t e2'
-subst _ _ q                    = q
+smartSubst ls e t (ExpOp e1 op e2)     = ExpOp e1' op e2'
+  where e1' = smartSubst ls e t e1
+        e2' = smartSubst ls e t e2
+smartSubst ls e t (Not e1)             = Not $ smartSubst ls e t e1
+smartSubst ls e t (UnFunc n ps)        = UnFunc n $ map (smartSubst ls e t) ps
+smartSubst ls e t (Forall bv@(BoundVariable bvn _)) e1)
+                                       = Forall bv $ smartSubst (bvn:ls) e t e1
+smartSubst ls e t (IfThenElse c e1 e2) = IfThenElse c' e1' e2'
+  where c'  = smartSubst ls e t c
+        e1' = smartSubst ls e t e1
+        e2' = smartSubst ls e t e2'
+smartSubst ls _ _ q                    = q
 
 chainForalls :: Variables -> Expression -> Expression
 chainForalls []     = id
