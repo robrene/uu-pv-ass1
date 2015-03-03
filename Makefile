@@ -14,6 +14,7 @@ symlinks : haskell
 	mkdir -p bin
 	ln -fs ../dist/build/parse-gcl/parse-gcl bin/
 	ln -fs ../dist/build/wlp/wlp bin/
+	ln -fs ../dist/build/expr2smt/expr2smt bin/
 
 clean :
 	rm -f src/CCO/GCL/AG.hs
