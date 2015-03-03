@@ -13,6 +13,7 @@ haskell : src/CCO/GCL/AG.hs
 symlinks : haskell
 	mkdir -p bin
 	ln -fs ../dist/build/parse-gcl/parse-gcl bin/
+	ln -fs ../dist/build/wlp/wlp bin/
 
 clean :
 	rm -f src/CCO/GCL/AG.hs
