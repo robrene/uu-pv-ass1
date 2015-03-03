@@ -23,7 +23,6 @@ sem Statement
 
 sem Variable
   | Variable       loc.copy = Variable @name @ty.copy
-  | Credentialized loc.copy = Credentialized @cred @name @ty.copy
 
 sem BoundVariable
   | BoundVariable loc.copy = BoundVariable @name @ty.copy

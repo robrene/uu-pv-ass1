@@ -93,5 +93,4 @@ chainForalls (v:vs) = Forall (asBoundVariable v) . chainForalls vs
 
 asBoundVariable :: Variable -> BoundVariable
 asBoundVariable (Variable name ty) = BoundVariable name ty
-asBoundVariable (Credentialized cred name ty) = BoundVariable name ty
 }

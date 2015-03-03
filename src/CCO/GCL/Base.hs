@@ -58,13 +58,9 @@ instance Tree Statement where
                      ]
 
 instance Tree Variable where
-  fromTree (Credentialized cred name ty) = T.App "Credentialized" [ fromTree cred
-                                                                  , fromTree name
-                                                                  , fromTree ty ]
   fromTree (Variable name ty) = T.App "Variable" [ fromTree name
                                                  , fromTree ty ]
-  toTree = parseTree [ app "Credentialized" (Credentialized <$> arg <*> arg <*> arg)
-                     , app "Variable" (Variable <$> arg <*> arg) ]
+  toTree = parseTree [ app "Variable" (Variable <$> arg <*> arg) ]
 
 instance Tree BoundVariable where
   fromTree (BoundVariable name ty) = T.App "BoundVariable" [ fromTree name

@@ -15,7 +15,6 @@ attr Variables Variable
 
 sem Variable
   | Variable       loc.varNames = [@name]
-  | Credentialized loc.varNames = [@name]
 
 -- Rename all variable names from "x" to "x$n", where n is the depth of nested
 -- Var statements. Keep map of substitutions so all nodes can apply them.
@@ -62,9 +61,8 @@ sem Statement
   | Var        loc.renamed = Var @vars.renamedL @body.renamed
 
 sem Variable
-  | *              loc.newName = rename @lhs.substitutions @name
-  | Variable       loc.renamed = Variable @newName @ty.copy
-  | Credentialized loc.renamed = Credentialized @cred @newName @ty.copy
+  | Variable loc.newName = rename @lhs.substitutions @name
+             loc.renamed = Variable @newName @ty.copy
 
 sem BoundVariable
   | BoundVariable loc.newName = rename @lhs.substitutions @name
