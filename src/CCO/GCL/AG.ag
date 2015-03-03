@@ -3,6 +3,7 @@ module {CCO.GCL.AG} {}
 }
 
 include "AG/Base.ag"
+include "AG/NonTrivialFields.ag"
 include "AG/RenameVars.ag"
 
 {

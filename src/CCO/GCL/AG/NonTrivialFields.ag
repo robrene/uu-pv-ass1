@@ -1,0 +1,65 @@
+imports
+{
+}
+
+-- Copy non-trivial fields so they can be referred to.
+
+attr Program Statement Variable BoundVariable AsgTarget Expression Type ArrayType
+  syn copy :: self
+
+sem Program
+  | Program loc.copy = Program @name @params.copyL @code.copy
+
+sem Statement
+  | Skip       loc.copy = Skip
+  | Assert     loc.copy = Assert @exp.copy
+  | Assume     loc.copy = Assume @exp.copy
+  | Assignment loc.copy = Assignment @tar.copy @exp.copy
+  | Return     loc.copy = Return @exp.copy
+  | Seq        loc.copy = Seq @s1.copy @s2.copy
+  | Square     loc.copy = Square @s1.copy @s2.copy
+  | While      loc.copy = While @inv.copy @cond.copy @body.copy
+  | Var        loc.copy = Var @vars.copyL @body.copy
+
+sem Variable
+  | Variable       loc.copy = Variable @name @ty.copy
+  | Credentialized loc.copy = Credentialized @cred @name @ty.copy
+
+sem BoundVariable
+  | BoundVariable loc.copy = BoundVariable @name @ty.copy
+
+sem AsgTarget
+  | Target    loc.copy = Target @name
+  | TargetArr loc.copy = TargetArr @name @idx.copy
+
+sem Expression
+  | BoolLiteral loc.copy = BoolLiteral @val
+  | IntLiteral  loc.copy = IntLiteral @val
+  | Name        loc.copy = Name @name
+  | ExpOp       loc.copy = ExpOp @exp1.copy @op @exp2.copy
+  | Not         loc.copy = Not @exp.copy
+  | UnFunc      loc.copy = UnFunc @name @params.copyL
+  | Forall      loc.copy = Forall @bvar.copy @exp.copy
+  | ArrAccess   loc.copy = ArrAccess @name @idx.copy
+  | IfThenElse  loc.copy = IfThenElse @cond.copy @exp1.copy @exp2.copy
+
+sem Type
+  | PrimitiveTy loc.copy = PrimitiveTy @pty
+  | ArrayTy     loc.copy = ArrayTy @aty.copy
+
+sem ArrayType
+  | Array loc.copy = Array @ty
+
+-- Copy lists as well.
+
+attr Variable Variables
+  syn copyL use {++} {[]} :: {Variables}
+
+sem Variable
+  | * loc.copyL = [@copy]
+
+attr Expression Expressions
+  syn copyL use {++} {[]} :: {Expressions}
+
+sem Expression
+  | * loc.copyL = [@copy]

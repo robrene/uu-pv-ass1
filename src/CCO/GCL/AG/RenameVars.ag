@@ -98,14 +98,3 @@ attr Expressions Expression
 
 sem Expression
   | * lhs.renamedL = [@renamed]
-
--- Copy types so they can be referred to.
-attr Type ArrayType
-  syn copy :: self
-
-sem Type
-  | PrimitiveTy lhs.copy = PrimitiveTy @pty
-  | ArrayTy     lhs.copy = ArrayTy @aty.copy
-
-sem ArrayType
-  | Array lhs.copy = Array @ty
