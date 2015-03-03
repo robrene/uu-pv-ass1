@@ -8,6 +8,7 @@ attr Program
 
 sem Program
   | Program loc.postQ = BoolLiteral True
+            loc.wlp = chainForalls @params.copyL @code.wlp
 
 attr Statement
   inh postQ :: {Expression}
