@@ -66,13 +66,15 @@ subst e t q = smartSubst [] e t q
 -- Like subst, but with an ignore list.
 smartSubst :: [Name] -> Expression -> AsgTarget -> Expression -> Expression
 -- Actual substitutions:
+
 smartSubst ls e (Target x) r@(Ref n)
   | x == n && x `notElem` ls = e
   | otherwise                = r
+
 smartSubst ls e t@(TargetArr a i) arr@(ArrAccess a' i')
-  | a == a'     = IfThenElse sameIdx e arr
-  | otherwise   = ArrAccess a' $ smartSubst ls e t i'
-    where sameIdx = ExpOp i' OpEquals i
+  | a == a' && a `notElem` ls = IfThenElse (ExpOp i' OpEquals i) e arr
+  | otherwise                 = ArrAccess a' $ smartSubst ls e t i'
+
 -- Recursion into substructures:
 smartSubst ls e t (ExpOp e1 op e2)     = ExpOp e1' op e2'
   where e1' = smartSubst ls e t e1

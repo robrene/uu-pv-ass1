@@ -24,7 +24,7 @@ expr2smt (ExpOp exp1 op exp2)        = pspaced [binop2smt op, expr2smt exp1, exp
 expr2smt (Not exp)                   = pspaced ["not", expr2smt exp]
 expr2smt (Func _ _)                  = error "Function calls are not supported."
 expr2smt (Forall bvar exp)           = pspaced ["forall", parens $ bvar2smt bvar, expr2smt exp]
-expr2smt (ArrAccess name idx)        = pspaced ["select", name, expr2smt idx]
+expr2smt (ArrAccess name idx)        = pspaced ["select", cleanName name, expr2smt idx]
 expr2smt (IfThenElse cond exp1 exp2) = pspaced ["ite", expr2smt cond, expr2smt exp1, expr2smt exp2]
 
 binop2smt :: BinaryOp -> String
@@ -48,7 +48,7 @@ bvar2smt (BoundVariable name ty) = pspaced [cleanName name, ty2smt ty]
 
 ty2smt :: Type -> String
 ty2smt (PrimitiveTy pty)     = pty2smt pty
-ty2smt (ArrayTy (Array pty)) = spaced ["Array", pty2smt pty]
+ty2smt (ArrayTy (Array pty)) = pspaced ["Array", pty2smt pty, pty2smt pty]
 
 pty2smt :: PrimitiveType -> String
 pty2smt PTyInt  = "Int"
