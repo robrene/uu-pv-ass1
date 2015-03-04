@@ -7,8 +7,7 @@ import Data.List        (intersperse, intercalate)
 main = ioWrap (parser >>> component toTree >>> arr mkSmtFile)
 
 mkSmtFile :: Expression -> String
-mkSmtFile exp = intercalate "\n" [ pspaced ["assert", smt]
-                                 , pspaced ["simplify", smt]
+mkSmtFile exp = intercalate "\n" [ pspaced ["assert", pspaced ["not", smt]]
                                  , "(check-sat)"
                                  , "(get-model)"
                                  , "(get-info :all-statistics)"

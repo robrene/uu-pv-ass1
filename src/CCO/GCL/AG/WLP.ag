@@ -8,15 +8,27 @@ attr Program
 
 sem Program
   | Program loc.postQ = BoolLiteral True
-            loc.wlp = chainForalls @params.copyL @code.wlp
+            loc.exprs = foldr (\x y -> ExpOp x OpConjunct y) @code.wlp @code.verifs
+            loc.wlp = chainForalls @params.copyL @exprs
+
+{
+chainForalls :: Variables -> Expression -> Expression
+chainForalls []     = id
+chainForalls (v:vs) = Forall (asBoundVariable v) . chainForalls vs
+
+asBoundVariable :: Variable -> BoundVariable
+asBoundVariable (Variable name ty) = BoundVariable name ty
+}
 
 attr Statement
-  inh postQ :: {Expression}
-  syn wlp   :: {Expression}
+  inh postQ       :: {Expression}
+  syn wlp         :: {Expression}
+  syn verifs      :: {[Expression]}
   syn hasReturned :: {Bool}
 
 sem Statement
-  | *          loc.hasReturned = False
+  | *          loc.verifs = []
+               loc.hasReturned = False
 
   -- wlp skip Q = Q
   | Skip       loc.wlp = @lhs.postQ
@@ -39,19 +51,22 @@ sem Statement
   -- Unless s1 is a return statement: wlp (return _ ; s2) Q = Q
   | Seq        s1.postQ = if @s1.hasReturned then @lhs.postQ else @s2.wlp
                loc.wlp  = @s1.wlp
+               lhs.verifs = @s1.verifs ++ @s2.verifs
 
   -- wlp (s1 [] s2) Q = wlp s1 Q /\ wlp s2 Q
   | Square     loc.wlp = ExpOp @s1.wlp OpConjunct @s2.wlp
+               lhs.verifs = @s1.verifs ++ @s2.verifs
 
   --                            { I,          provided I /\ not g => Q
   -- wlp (inv I while g do S) = {             and I /\ g => wlp S I
   --                            { not g /\ Q, otherwise
-  | While      body.postQ    = @inv.copy  -- @body.wlp ~= wlp S I
-               loc.reqs_g    = ExpOp (ExpOp @inv.copy OpConjunct @cond.copy) OpImply @body.wlp  -- I /\ g => wlp S I
-               loc.reqs_ng   = ExpOp (ExpOp @inv.copy OpConjunct (Not @cond.copy)) OpImply @lhs.postQ  -- I /\ not g => Q
-               loc.reqs      = ExpOp @reqs_g OpAnd @reqs_ng  -- "provided (..) and (..)"
-               loc.otherwise = ExpOp (Not @cond.copy) OpConjunct @lhs.postQ
-               loc.wlp       = IfThenElse @reqs @inv.copy @otherwise
+  -- We choose the first alternative. We pass the additional requirements in an
+  -- additional attribute to be checked by the theorem checker at a later point.
+  | While      body.postQ  = @inv.copy  -- @body.wlp ~= wlp S I
+               loc.reqs_ng = ExpOp (ExpOp @inv.copy OpConjunct (Not @cond.copy)) OpImply @lhs.postQ  -- I /\ not g => Q
+               loc.reqs_g  = ExpOp (ExpOp @inv.copy OpConjunct @cond.copy) OpImply @body.wlp  -- I /\ g => wlp S I
+               lhs.verifs  = ExpOp @reqs_ng OpAnd @reqs_g : @verifs
+               loc.wlp     = @inv.copy
 
   -- wlp (var x in S end) Q = (forall x :: wlp S Q)
   | Var        loc.wlp = chainForalls @vars.copyL @body.wlp
@@ -86,13 +101,6 @@ smartSubst ls e t (Forall bv@(BoundVariable bvn _) e1)
 smartSubst ls e t (IfThenElse c e1 e2) = IfThenElse c' e1' e2'
   where c'  = smartSubst ls e t c
         e1' = smartSubst ls e t e1
-        e2' = smartSubst ls e t e2'
+        e2' = smartSubst ls e t e2
 smartSubst ls _ _ q                    = q
-
-chainForalls :: Variables -> Expression -> Expression
-chainForalls []     = id
-chainForalls (v:vs) = Forall (asBoundVariable v) . chainForalls vs
-
-asBoundVariable :: Variable -> BoundVariable
-asBoundVariable (Variable name ty) = BoundVariable name ty
 }
