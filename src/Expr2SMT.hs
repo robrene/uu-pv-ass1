@@ -19,10 +19,10 @@ expr2smt :: Expression -> String
 expr2smt (BoolLiteral True)          = "true"
 expr2smt (BoolLiteral False)         = "false"
 expr2smt (IntLiteral val)            = show val
-expr2smt (Name name)                 = cleanName name
+expr2smt (Ref name)                  = cleanName name
 expr2smt (ExpOp exp1 op exp2)        = pspaced [binop2smt op, expr2smt exp1, expr2smt exp2]
 expr2smt (Not exp)                   = pspaced ["not", expr2smt exp]
-expr2smt (UnFunc _ _)                = error "Function calls are not supported."
+expr2smt (Func _ _)                  = error "Function calls are not supported."
 expr2smt (Forall bvar exp)           = pspaced ["forall", parens $ bvar2smt bvar, expr2smt exp]
 expr2smt (ArrAccess name idx)        = pspaced ["select", name, expr2smt idx]
 expr2smt (IfThenElse cond exp1 exp2) = pspaced ["ite", expr2smt cond, expr2smt exp1, expr2smt exp2]

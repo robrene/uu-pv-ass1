@@ -81,9 +81,9 @@ pSimpleExpression' :: TokenParser Expression
 pSimpleExpression' = (BoolLiteral True) <$ keyword "true"
                  <|> (BoolLiteral False) <$ keyword "false"
                  <|> (\val -> IntLiteral val) <$> nat
-                 <|> (\name -> Name name) <$> name
+                 <|> (\name -> Ref name) <$> name
                  <|> (\exp -> Not exp) <$ keyword "not" <*> pExpression
-                 <|> (\name params -> UnFunc name params)
+                 <|> (\name params -> Func name params)
                  <$> name <* spec '(' <*> manySepByComma pExpression <* spec ')'
                  <|> (\bvar exp -> Forall bvar exp)
                  <$  spec '(' <* keyword "forall" <*> pBoundVariable

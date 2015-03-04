@@ -76,10 +76,10 @@ sem AsgTarget
 sem Expression
   | BoolLiteral loc.renamed = BoolLiteral @val
   | IntLiteral  loc.renamed = IntLiteral @val
-  | Name        loc.renamed = Name $ rename @lhs.substitutions @name
+  | Ref         loc.renamed = Ref $ rename @lhs.substitutions @name
   | ExpOp       loc.renamed = ExpOp @exp1.renamed @op @exp2.renamed
   | Not         loc.renamed = Not @exp.renamed
-  | UnFunc      loc.renamed = UnFunc @name @params.renamedL
+  | Func        loc.renamed = Func @name @params.renamedL
   | Forall      loc.renamed = Forall @bvar.renamed @exp.renamed
   | ArrAccess   loc.renamed = ArrAccess @name @idx.renamed
   | IfThenElse  loc.renamed = IfThenElse @cond.renamed @exp1.renamed @exp2.renamed

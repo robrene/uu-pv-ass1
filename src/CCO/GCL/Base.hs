@@ -77,13 +77,13 @@ instance Tree AsgTarget where
 instance Tree Expression where
   fromTree (BoolLiteral val) = T.App "BoolLiteral" [ fromTree val ]
   fromTree (IntLiteral val) = T.App "IntLiteral" [ fromTree val ]
-  fromTree (Name name) = T.App "Name" [ fromTree name ]
+  fromTree (Ref name) = T.App "Ref" [ fromTree name ]
   fromTree (ExpOp exp1 op exp2) = T.App "ExpOp" [ fromTree exp1
                                                 , fromTree op
                                                 , fromTree exp2 ]
   fromTree (Not exp) = T.App "Not" [ fromTree exp ]
-  fromTree (UnFunc name exps) = T.App "UnFunc" [ fromTree name
-                                               , fromTree exps ]
+  fromTree (Func name exps) = T.App "Func" [ fromTree name
+                                           , fromTree exps ]
   fromTree (Forall bvar exp) = T.App "Forall" [ fromTree bvar
                                               , fromTree exp ]
   fromTree (ArrAccess name exp) = T.App "ArrAccess" [ fromTree name
@@ -93,10 +93,10 @@ instance Tree Expression where
                                                             , fromTree exp2 ]
   toTree = parseTree [ app "BoolLiteral" (BoolLiteral <$> arg)
                      , app "IntLiteral" (IntLiteral <$> arg)
-                     , app "Name" (Name <$> arg)
+                     , app "Ref" (Ref <$> arg)
                      , app "ExpOp" (ExpOp <$> arg <*> arg <*> arg)
                      , app "Not" (Not <$> arg)
-                     , app "UnFunc" (UnFunc <$> arg <*> arg)
+                     , app "Func" (Func <$> arg <*> arg)
                      , app "Forall" (Forall <$> arg <*> arg)
                      , app "ArrAccess" (ArrAccess <$> arg <*> arg)
                      , app "IfThenElse" (IfThenElse <$> arg <*> arg <*> arg)

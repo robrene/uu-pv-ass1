@@ -34,10 +34,10 @@ sem AsgTarget
 sem Expression
   | BoolLiteral loc.copy = BoolLiteral @val
   | IntLiteral  loc.copy = IntLiteral @val
-  | Name        loc.copy = Name @name
+  | Ref         loc.copy = Ref @name
   | ExpOp       loc.copy = ExpOp @exp1.copy @op @exp2.copy
   | Not         loc.copy = Not @exp.copy
-  | UnFunc      loc.copy = UnFunc @name @params.copyL
+  | Func        loc.copy = Func @name @params.copyL
   | Forall      loc.copy = Forall @bvar.copy @exp.copy
   | ArrAccess   loc.copy = ArrAccess @name @idx.copy
   | IfThenElse  loc.copy = IfThenElse @cond.copy @exp1.copy @exp2.copy

@@ -38,10 +38,10 @@ type Expressions = [Expression]
 data Expression
   | BoolLiteral  val :: {Bool}
   | IntLiteral  val :: {Int}
-  | Name  name :: {Name}
+  | Ref  name :: {Name}
   | ExpOp  exp1 :: Expression  op :: {BinaryOp}  exp2 :: Expression
   | Not  exp :: Expression
-  | UnFunc  name :: {Name}  params :: Expressions
+  | Func  name :: {Name}  params :: Expressions
   | Forall  bvar :: BoundVariable  exp :: Expression
   | ArrAccess  name :: {Name}  idx :: Expression
   | IfThenElse  cond :: Expression  exp1 :: Expression  exp2 :: Expression
