@@ -1,0 +1,8 @@
+main (x:int) {
+  assume x>=0 ;
+  var y:int in {
+    y := x ;
+    x := x - y
+  } end ;
+  assert x=0
+}

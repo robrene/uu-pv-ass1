@@ -1,0 +1,7 @@
+main (x:int) {
+  assume x>0 ;
+  x := x - 1 ;
+  assert x>=0 ;
+  return x ;
+  assert x<100
+}

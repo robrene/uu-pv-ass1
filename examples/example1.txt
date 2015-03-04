@@ -1,6 +1,0 @@
-var x:int, rv:int in
-  assume x>0 ;
-  inv  x>=0 while x>0 do { x := x-1 } ;
-  rv := x ;
-  assert rv=0
-end

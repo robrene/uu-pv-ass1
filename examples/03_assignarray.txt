@@ -1,0 +1,8 @@
+main (x:[]int) {
+  assume x[0]>=0 ;
+  var y:int in {
+    y := x[0] ;
+    x[0] := y + 1
+  } end ;
+  assert x[0]>0
+}

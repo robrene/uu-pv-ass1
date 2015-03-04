@@ -1,0 +1,5 @@
+main () {
+  assume true ;
+  skip ;
+  assert true
+}
