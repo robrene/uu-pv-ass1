@@ -37,7 +37,8 @@ pStatement = spec '{' *> pStatement <* spec '}'
          <$> pStatement' <* spec '[' <* spec ']' <*> pStatement
 
 pStatement' :: TokenParser Statement
-pStatement' = (Skip) <$ keyword "skip"
+pStatement' = spec '{' *> pStatement <* spec '}'
+          <|> (Skip) <$ keyword "skip"
           <|> (\exp -> Assert exp) <$ keyword "assert" <*> pExpression
           <|> (\exp -> Assume exp) <$ keyword "assume" <*> pExpression
           <|> (\tar exp -> Assignment tar exp)
@@ -73,12 +74,14 @@ pExpression = spec '(' *> pExpression <* spec ')'
 
 
 pSimpleExpression :: TokenParser Expression
-pSimpleExpression = pSimpleExpression'
+pSimpleExpression = spec '(' *> pExpression <* spec ')'
+                <|> pSimpleExpression'
                 <|> (\exp1 op exp2 -> ExpOp exp1 op exp2)
                 <$> pSimpleExpression' <*> pBinaryOp <*> pSimpleExpression
 
 pSimpleExpression' :: TokenParser Expression
-pSimpleExpression' = (BoolLiteral True) <$ keyword "true"
+pSimpleExpression' = spec '(' *> pExpression <* spec ')'
+                 <|> (BoolLiteral True) <$ keyword "true"
                  <|> (BoolLiteral False) <$ keyword "false"
                  <|> (\val -> IntLiteral val) <$> nat
                  <|> (\name -> Ref name) <$> name
