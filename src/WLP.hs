@@ -22,21 +22,21 @@ asBoundVariable :: Variable -> BoundVariable
 asBoundVariable (Variable name ty) = BoundVariable name ty
 
 wlp :: Expression -> [Expression] -> Statement -> (Expression, [Expression])
-wlp _Q _verifs (Skip)                 = (_Q, _verifs)
-wlp _Q _verifs s@(Assert exp)         = (ExpOp exp OpConjunct _Q, _verifs)
-wlp _Q _verifs s@(Assume exp)         = (ExpOp exp OpImply _Q, _verifs)
-wlp _Q _verifs s@(Assignment tar exp) = (subst exp tar _Q, _verifs)
-wlp _Q _verifs s@(Return exp)         = (_Q, _verifs)
-wlp _Q _verifs s@(Seq (Return _) _)   = (_Q, _verifs)
-wlp _Q _verifs s@(Seq s1 s2) = wlp wlp_s2 verifs_s2 s1
+wlp _Q _verifs (Skip)               = (_Q, _verifs)
+wlp _Q _verifs (Assert exp)         = (ExpOp exp OpConjunct _Q, _verifs)
+wlp _Q _verifs (Assume exp)         = (ExpOp exp OpImply _Q, _verifs)
+wlp _Q _verifs (Assignment tar exp) = (subst exp tar _Q, _verifs)
+wlp _Q _verifs (Return exp)         = (_Q, _verifs)
+wlp _Q _verifs (Seq (Return _) _)   = (_Q, _verifs)
+wlp _Q _verifs (Seq s1 s2) = wlp wlp_s2 verifs_s2 s1
     where (wlp_s2, verifs_s2) = wlp _Q _verifs s2
-wlp _Q _verifs s@(Square s1 s2)       = (ExpOp wlp_s1 OpConjunct wlp_s2, verifs_s1 ++ verifs_s2)
+wlp _Q _verifs (Square s1 s2)       = (ExpOp wlp_s1 OpConjunct wlp_s2, verifs_s1 ++ verifs_s2)
     where (wlp_s1, verifs_s1) = wlp _Q _verifs s1
           (wlp_s2, verifs_s2) = wlp _Q _verifs s2
-wlp _Q _verifs s@(While inv g s0)     = (inv, ExpOp req1 OpConjunct req2 : _verifs)
+wlp _Q _verifs (While inv g s0)     = (inv, ExpOp req1 OpConjunct req2 : _verifs)
     where req1 = ExpOp (ExpOp inv OpConjunct (Not g)) OpImply _Q
           req2 = ExpOp (ExpOp inv OpConjunct g) OpImply (fst $ wlp inv _verifs s0)
-wlp _Q _verifs s@(Var vars s0)        = (chainForalls vars wlp_s0, verifs_s0)
+wlp _Q _verifs (Var vars s0)        = (chainForalls vars wlp_s0, verifs_s0)
     where (wlp_s0, verifs_s0) = wlp _Q _verifs s0
 
 -- subst e t Q      ~= "substitute occurrences of t in Q with e"
