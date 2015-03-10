@@ -1,5 +1,5 @@
 import CCO.Component    (component, printer, ioWrap)
-import CCO.GCL hiding (wlp)
+import CCO.GCL
 import CCO.Tree         (fromTree, toTree, parser)
 import Control.Arrow    (arr, (>>>))
 
