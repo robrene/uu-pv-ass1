@@ -8,9 +8,9 @@ include "AG/RenameVars.ag"
 include "AG/WLP.ag"
 
 {
-renameVars :: Program -> Program
-renameVars = \pr -> renamed_Syn_Program (wrap_Program (sem_Program pr) Inh_Program)
+renameVars :: Programs -> Programs
+renameVars = \ps -> renamedL_Syn_Programs (wrap_Programs (sem_Programs ps) Inh_Programs)
 
-wlp :: Program -> Expression
-wlp = \pr -> wlp_Syn_Program (wrap_Program (sem_Program pr) Inh_Program)
+wlp :: Programs -> Expressions
+wlp = \ps -> wlps_Syn_Programs (wrap_Programs (sem_Programs ps) Inh_Programs)
 }

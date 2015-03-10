@@ -86,6 +86,12 @@ sem Expression
   | IfThenElse  loc.renamed = IfThenElse @cond.renamed @exp1.renamed @exp2.renamed
 
 -- Use special attribute for list types.
+attr Programs Program
+  syn renamedL use {++} {[]} :: Programs
+
+sem Program
+  | * lhs.renamedL = [@renamed]
+
 attr Variables Variable
   syn renamedL use {++} {[]} :: Variables
 

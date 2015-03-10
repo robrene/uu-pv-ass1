@@ -97,6 +97,7 @@ pSimpleExpression' = spec '(' *> pExpression <* spec ')'
                  <|> (BoolLiteral False) <$ keyword "false"
                  <|> (\val -> IntLiteral val) <$> nat
                  <|> (\name -> Ref name) <$> name
+                 <|> (Ref "$RV") <$ keyword "$RV"
                  <|> (\exp -> Not exp) <$ keyword "not" <*> pExpression
                  <|> (\name params -> Func name params)
                  <$> name <* spec '(' <*> manySepByComma pExpression <* spec ')'

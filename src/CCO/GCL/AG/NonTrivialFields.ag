@@ -22,7 +22,7 @@ sem Statement
   | Var        loc.copy = Var @vars.copyL @body.copy
 
 sem Variable
-  | Variable       loc.copy = Variable @name @ty.copy
+  | Variable loc.copy = Variable @name @ty.copy
 
 sem BoundVariable
   | BoundVariable loc.copy = BoundVariable @name @ty.copy

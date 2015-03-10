@@ -77,6 +77,7 @@ keyword_ = fmap Keyword $ string "skip"
                       <|> string "forall"
                       <|> string "or" <|> string "and"
                       <|> string "int" <|> string "bool"
+                      <|> string "$RV"
 
 -- | A 'Lexer' that recognises 'Name' tokens.
 name_ :: Lexer Token

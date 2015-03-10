@@ -2,6 +2,9 @@ imports
 {
 }
 
+attr Programs Program
+  syn wlps use {++} {[]}:: {[Expression]}
+
 attr Program
   syn postQ :: {Expression}
   syn wlp   :: {Expression}
@@ -9,13 +12,20 @@ attr Program
 sem Program
   | Program loc.postQ = @postcond.copy
             loc.wlp = mkProgramWlp @precond.copy @params.copyL (@code.wlp, @code.verifs)
+            loc.wlps = [@wlp]
 
 {
+conjunct :: Expression -> Expression -> Expression
+conjunct x y    = ExpOp x OpConjunct y
+(∧) = conjunct
+
+imply :: Expression -> Expression -> Expression
+imply x y       = ExpOp x OpImply y
+(⇒) = imply
+
 mkProgramWlp :: Expression -> Variables -> (Expression, [Expression]) -> Expression
 mkProgramWlp precond params (wlpCode, wlpVerifs) = foldr conjunct quantifiedWlp quantifiedExprs
-  where conjunct x y    = ExpOp x OpConjunct y
-        imply x y       = ExpOp x OpImply y
-        quantify e      = chainForalls params e
+  where quantify e      = chainForalls params e
         quantifiedExprs = map quantify wlpVerifs
         quantifiedWlp   = quantify (imply precond wlpCode)
 
@@ -40,18 +50,18 @@ sem Statement
   -- wlp skip Q = Q
   | Skip       loc.wlp = @lhs.postQ
 
-  -- wlp (assert P) Q = P /\ Q
-  | Assert     loc.wlp = ExpOp @exp.copy OpConjunct @lhs.postQ
+  -- wlp (assert P) Q = P ∧ Q
+  | Assert     loc.wlp = @exp.copy ∧ @lhs.postQ
 
   -- wlp (assume P) Q = P => Q
-  | Assume     loc.wlp = ExpOp @exp.copy OpImply @lhs.postQ
+  | Assume     loc.wlp = @exp.copy `imply` @lhs.postQ
 
   -- wlp (x := e) Q = Q[e/x]
   -- wlp (a[i] := e) Q = Q[a(i repby e)/a]
   | Assignment loc.wlp = subst @exp.copy @tar.copy @lhs.postQ
 
   -- wlp (return _) Q = Q, and mark the fact for control flow.
-  | Return     loc.wlp = @lhs.postQ
+  | Return     loc.wlp = subst @exp.copy (Target "$RV") @lhs.postQ
                lhs.hasReturned = True
 
   -- wlp (s1 ; s2) Q = wlp s1 (wlp s2 Q)
@@ -60,19 +70,19 @@ sem Statement
                loc.wlp  = @s1.wlp
                lhs.verifs = @s1.verifs ++ @s2.verifs
 
-  -- wlp (s1 [] s2) Q = wlp s1 Q /\ wlp s2 Q
-  | Square     loc.wlp = ExpOp @s1.wlp OpConjunct @s2.wlp
+  -- wlp (s1 [] s2) Q = wlp s1 Q ∧ wlp s2 Q
+  | Square     loc.wlp = @s1.wlp ∧ @s2.wlp
                lhs.verifs = @s1.verifs ++ @s2.verifs
 
-  --                            { I,          provided I /\ not g => Q
-  -- wlp (inv I while g do S) = {             and I /\ g => wlp S I
-  --                            { not g /\ Q, otherwise
+  --                            { I,         provided I ∧ not g => Q
+  -- wlp (inv I while g do S) = {            and I ∧ g => wlp S I
+  --                            { not g ∧ Q, otherwise
   -- We choose the first alternative. We pass the additional requirements in an
   -- additional attribute to be checked by the theorem checker at a later point.
-  | While      body.postQ  = @inv.copy  -- @body.wlp ~= wlp S I
-               loc.reqs_ng = ExpOp (ExpOp @inv.copy OpConjunct (Not @cond.copy)) OpImply @lhs.postQ  -- I /\ not g => Q
-               loc.reqs_g  = ExpOp (ExpOp @inv.copy OpConjunct @cond.copy) OpImply @body.wlp  -- I /\ g => wlp S I
-               lhs.verifs  = ExpOp @reqs_ng OpAnd @reqs_g : @verifs
+  | While      body.postQ  = @inv.copy  -- @body.wlp <- wlp S I
+               loc.reqs_ng = (@inv.copy ∧ Not @cond.copy) `imply` @lhs.postQ  -- I ∧ not g => Q
+               loc.reqs_g  = (@inv.copy ∧ @cond.copy) `imply` @body.wlp         -- I ∧ g => wlp S I
+               lhs.verifs  = @reqs_ng ∧ @reqs_g : @verifs
                loc.wlp     = @inv.copy
 
   -- wlp (var x in S end) Q = (forall x :: wlp S Q)
@@ -88,7 +98,6 @@ subst e t q = smartSubst [] e t q
 -- Like subst, but with an ignore list.
 smartSubst :: [Name] -> Expression -> AsgTarget -> Expression -> Expression
 -- Actual substitutions:
-
 smartSubst ls e (Target x) r@(Ref n)
   | x == n && x `notElem` ls = e
   | otherwise                = r

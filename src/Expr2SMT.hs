@@ -6,13 +6,14 @@ import Data.List        (intersperse, intercalate)
 
 main = ioWrap (parser >>> component toTree >>> arr mkSmtFile)
 
-mkSmtFile :: Expression -> String
-mkSmtFile exp = intercalate "\n" [ pspaced ["assert", pspaced ["not", smt]]
-                                 , "(check-sat)"
-                                 , "(get-model)"
-                                 , "(get-info :all-statistics)"
-                                 , "" ]
-  where smt = expr2smt exp
+mkSmtFile :: Expressions -> String
+mkSmtFile exps = intercalate "\n" [ assertions
+                                  , "(check-sat)"
+                                  , "(get-model)"
+                                  , "(get-info :all-statistics)"
+                                  , "" ]
+  where assertions = intercalate "\n" $ map assertnot exps
+        assertnot e = pspaced ["assert", pspaced ["not", expr2smt e]]
 
 expr2smt :: Expression -> String
 expr2smt (BoolLiteral True)          = "true"
