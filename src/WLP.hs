@@ -6,9 +6,12 @@ import Control.Arrow    (arr, (>>>))
 main = ioWrap (parser >>> component toTree >>> arr renameVars >>> arr wlpProgram >>> arr fromTree >>> printer)
 
 wlpProgram :: Program -> Expression
-wlpProgram (Program name params code) = chainForalls params exprs
-  where exprs = foldr (\x y -> ExpOp x OpConjunct y) wlpCode wlpVerifs
+wlpProgram (Program name params code) = foldr conjunct quantifiedWlp quantifiedExprs
+  where conjunct x y = ExpOp x OpConjunct y
         (wlpCode, wlpVerifs) = wlp (BoolLiteral True) [] code
+        quantify e = chainForalls params e
+        quantifiedExprs = map quantify wlpVerifs
+        quantifiedWlp = quantify wlpCode
 
 chainForalls :: Variables -> Expression -> Expression
 chainForalls []     = id
