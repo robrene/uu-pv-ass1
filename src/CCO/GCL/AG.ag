@@ -5,8 +5,12 @@ module {CCO.GCL.AG} {}
 include "AG/Base.ag"
 include "AG/NonTrivialFields.ag"
 include "AG/RenameVars.ag"
+include "AG/WLP.ag"
 
 {
 renameVars :: Program -> Program
 renameVars = \pr -> renamed_Syn_Program (wrap_Program (sem_Program pr) Inh_Program)
+
+wlp :: Program -> Expression
+wlp = \pr -> wlp_Syn_Program (wrap_Program (sem_Program pr) Inh_Program)
 }

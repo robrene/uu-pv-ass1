@@ -14,6 +14,7 @@ module CCO.GCL (
   , PrimitiveType (..)
   , ArrayType (..)
   , renameVars
+  , wlp
 ) where
 
 import CCO.GCL.Base
