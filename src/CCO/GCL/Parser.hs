@@ -25,7 +25,8 @@ parser = C.parser lexer (pProgram <* eof)
 
 pProgram :: TokenParser Program
 pProgram = (\name params code -> Program name params code)
-       <$> name <* spec '(' <*> manySepByComma pVariable <* spec ')' <*> pStatement
+       <$> name <* spec '(' <*> manySepByComma pVariable <* spec ')'
+       <*  spec '{' <*> pStatement <* spec '}'
        <|> (\code -> Program "unnamed" [] code) <$> pStatement
 
 pStatement :: TokenParser Statement
@@ -47,7 +48,7 @@ pStatement' = spec '{' *> pStatement <* spec '}'
           <|> (\inv cond body -> While inv cond body)
           <$  keyword "inv" <*> pExpression
           <* keyword "while" <*> pExpression
-          <* keyword "do" <*> pStatement
+          <* keyword "do"  <* spec '{' <*> pStatement <* spec '}'
           <|> (\vars body -> Var vars body)
           <$  keyword "var" <*> manySepByComma pVariable
           <* keyword "in" <*> pStatement <* keyword "end"

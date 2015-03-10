@@ -10,6 +10,8 @@ type Name = String
 data Program
   | Program  name :: {Name}  params :: Variables  code :: Statement
 
+deriving Program : Show
+
 data Statement
   | Skip
   | Assert  exp :: Expression
@@ -20,18 +22,22 @@ data Statement
   | Square  s1 :: Statement  s2 :: Statement
   | While  inv :: Expression  cond :: Expression  body :: Statement
   | Var  vars :: Variables  body :: Statement
+deriving Statement : Show
 
 type Variables = [Variable]
 
 data Variable
   | Variable  name :: {Name}  ty :: Type
+deriving Variable : Show
 
 data BoundVariable
   | BoundVariable  name :: {Name}  ty :: Type
+deriving BoundVariable : Show
 
 data AsgTarget
   | Target  name :: {Name}
   | TargetArr  name :: {Name}  idx :: Expression
+deriving AsgTarget : Show
 
 type Expressions = [Expression]
 
@@ -45,6 +51,7 @@ data Expression
   | Forall  bvar :: BoundVariable  exp :: Expression
   | ArrAccess  name :: {Name}  idx :: Expression
   | IfThenElse  cond :: Expression  exp1 :: Expression  exp2 :: Expression
+deriving Expression : Show
 
 {
 data BinaryOp = OpPlus
@@ -61,16 +68,20 @@ data BinaryOp = OpPlus
               | OpGT
               | OpGTE
               | OpEquals
+  deriving Show
 }
 
 data Type
   | PrimitiveTy  pty :: {PrimitiveType}
   | ArrayTy  aty :: ArrayType
+deriving Type : Show
 
 {
 data PrimitiveType = PTyInt
                    | PTyBool
+  deriving Show
 }
 
 data ArrayType
   | Array  ty :: {PrimitiveType}
+deriving ArrayType : Show

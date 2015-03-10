@@ -1,8 +1,8 @@
 main (x:int) {
   assume x>=0 ;
-  var y:int in {
+  var y:int in
     y := x ;
     x := x - y
-  } end ;
+  end ;
   assert x=0
 }

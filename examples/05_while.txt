@@ -1,19 +1,8 @@
-main (a:int, b:int, c:int, d:int, e:int) {
-  assume a>0 && b>0 && c>0 && d>0 && e>0 ;
-  inv a>=0 while a>0 do {
-    a := a - 1
+main (x:int, rv:int) {
+  assume x>0 ;
+  inv x>=0 while x>0 do {
+    x := x - 1
   } ;
-  inv b>=0 while b>0 do {
-    b := b - 1
-  } ;
-  inv c>=0 while c>0 do {
-    c := c - 1
-  } ;
-  inv d>=0 while d>0 do {
-    d := d - 1
-  } ;
-  inv e>=0 while e>0 do {
-    e := e - 1
-  } ;
-  assert (a+b+c+d+e)=0
+  rv := x;
+  assert rv=0
 }
