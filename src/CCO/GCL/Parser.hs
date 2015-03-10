@@ -19,12 +19,15 @@ type TokenParser = Parser Token
 manySepByComma :: TokenParser a -> TokenParser [a]
 manySepByComma = manySepBy (spec ',')
 
--- A 'Component' for parsing terms.
-parser :: Component String Program
-parser = C.parser lexer (pProgram <* eof)
-
 true :: Expression
 true = BoolLiteral True
+
+-- A 'Component' for parsing terms.
+parser :: Component String Programs
+parser = C.parser lexer (pPrograms <* eof)
+
+pPrograms :: TokenParser Programs
+pPrograms = some pProgram
 
 pProgram :: TokenParser Program
 pProgram = (\name params code -> Program name params code true true)

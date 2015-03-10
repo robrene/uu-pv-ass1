@@ -7,6 +7,8 @@ import CCO.SourcePos
 type Name = String
 }
 
+type Programs = [Program]
+
 data Program
   | Program  name :: {Name}  params :: Variables  code :: Statement  precond :: Expression  postcond :: Expression
 

@@ -3,7 +3,7 @@ import CCO.GCL
 import CCO.Tree         (fromTree, toTree, parser)
 import Control.Arrow    (arr, (>>>))
 
-main = ioWrap (parser >>> component toTree >>> arr renameVars >>> arr wlpProgram >>> arr fromTree >>> printer)
+main = ioWrap (parser >>> component toTree >>> arr head >>> arr renameVars >>> arr wlpProgram >>> arr fromTree >>> printer)
 
 wlpProgram :: Program -> Expression
 wlpProgram (Program name params code precond postcond) =

@@ -1,5 +1,6 @@
 module CCO.GCL (
     Name
+  , Programs
   , Program (..)
   , Statement (..)
   , Variables
