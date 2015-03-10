@@ -8,11 +8,12 @@ main = ioWrap (parser >>> component toTree >>> arr renameVars >>> arr wlpProgram
 wlpProgram :: Program -> Expression
 wlpProgram (Program name params code precond postcond) =
   foldr conjunct quantifiedWlp quantifiedExprs
-    where conjunct x y = ExpOp x OpConjunct y
-          (wlpCode, wlpVerifs) = wlp (BoolLiteral True) [] code
-          quantify e = chainForalls params e
-          quantifiedExprs = map quantify wlpVerifs
-          quantifiedWlp = quantify wlpCode
+    where conjunct x y         = ExpOp x OpConjunct y
+          imply x y            = ExpOp x OpImply y
+          (wlpCode, wlpVerifs) = wlp postcond [] code
+          quantify e           = chainForalls params e
+          quantifiedExprs      = map quantify wlpVerifs
+          quantifiedWlp        = quantify (imply precond wlpCode)
 
 chainForalls :: Variables -> Expression -> Expression
 chainForalls []     = id
