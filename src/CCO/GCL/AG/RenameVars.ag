@@ -47,7 +47,7 @@ attr Program Statement Variable BoundVariable AsgTarget Expression
   syn renamed :: self
 
 sem Program
-  | Program loc.renamed = Program @name @params.renamedL @code.renamed
+  | Program loc.renamed = Program @name @params.renamedL @code.renamed @precond.renamed @postcond.renamed
 
 sem Statement
   | Skip       loc.renamed = Skip

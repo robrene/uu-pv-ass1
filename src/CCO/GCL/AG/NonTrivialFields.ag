@@ -8,7 +8,7 @@ attr Program Statement Variable BoundVariable AsgTarget Expression Type ArrayTyp
   syn copy :: self
 
 sem Program
-  | Program loc.copy = Program @name @params.copyL @code.copy
+  | Program loc.copy = Program @name @params.copyL @code.copy @precond.copy @postcond.copy
 
 sem Statement
   | Skip       loc.copy = Skip

@@ -25,10 +25,13 @@ import Control.Applicative        (Applicative ((<*>)), (<$>), pure)
 -------------------------------------------------------------------------------
 
 instance Tree Program where
-  fromTree (Program name params code) = T.App "Program" [ fromTree name
-                                                        , fromTree params
-                                                        , fromTree code ]
-  toTree = parseTree [ app "Program" (Program <$> arg <*> arg <*> arg) ]
+  fromTree (Program name params code precond postcond) =
+    T.App "Program" [ fromTree name
+                    , fromTree params
+                    , fromTree code
+                    , fromTree precond
+                    , fromTree postcond ]
+  toTree = parseTree [ app "Program" (Program <$> arg <*> arg <*> arg <*> arg <*> arg) ]
 
 instance Tree Statement where
   fromTree (Skip) = T.App "Skip" []

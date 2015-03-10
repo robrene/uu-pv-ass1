@@ -8,7 +8,7 @@ type Name = String
 }
 
 data Program
-  | Program  name :: {Name}  params :: Variables  code :: Statement
+  | Program  name :: {Name}  params :: Variables  code :: Statement  precond :: Expression  postcond :: Expression
 
 deriving Program : Show
 

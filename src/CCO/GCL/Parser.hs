@@ -23,11 +23,14 @@ manySepByComma = manySepBy (spec ',')
 parser :: Component String Program
 parser = C.parser lexer (pProgram <* eof)
 
+true :: Expression
+true = BoolLiteral True
+
 pProgram :: TokenParser Program
-pProgram = (\name params code -> Program name params code)
+pProgram = (\name params code -> Program name params code true true)
        <$> name <* spec '(' <*> manySepByComma pVariable <* spec ')'
        <*  spec '{' <*> pStatement <* spec '}'
-       <|> (\code -> Program "unnamed" [] code) <$> pStatement
+       <|> (\code -> Program "unnamed" [] code true true) <$> pStatement
 
 pStatement :: TokenParser Statement
 pStatement = spec '{' *> pStatement <* spec '}'
