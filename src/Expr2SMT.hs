@@ -4,16 +4,19 @@ import CCO.Tree         (parser, toTree)
 import Control.Arrow    ((>>>), arr)
 import Data.List        (intersperse, intercalate)
 
-main = ioWrap (parser >>> component toTree >>> arr mkSmtFile)
+main = ioWrap (parser >>> component toTree >>> arr mkSmtFiles)
 
-mkSmtFile :: Expressions -> String
-mkSmtFile exps = intercalate "\n" [ assertions
-                                  , "(check-sat)"
-                                  , "(get-model)"
-                                  , "(get-info :all-statistics)"
-                                  , "" ]
-  where assertions = intercalate "\n" $ map assertnot exps
-        assertnot e = pspaced ["assert", pspaced ["not", expr2smt e]]
+mkSmtFiles :: Expressions -> String
+mkSmtFiles exps = intercalate "\n" $ map mkSmtFile exps
+
+mkSmtFile :: Expression -> String
+mkSmtFile exp = intercalate "\n" [ "(push)"
+                                 , pspaced ["assert", pspaced ["not", expr2smt exp]]
+                                 , "(check-sat)"
+                                 , "(get-model)"
+                                 , "(get-info :all-statistics)"
+                                 , "(pop)"
+                                 , "" ]
 
 expr2smt :: Expression -> String
 expr2smt (BoolLiteral True)          = "true"

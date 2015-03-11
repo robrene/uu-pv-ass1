@@ -18,46 +18,49 @@ mkWorldMap ((Program name params _ pre post):ps) =
 
 transformProg :: WorldMap -> Program -> Program
 transformProg wm (Program name params code precond postcond) =
-  Program name params (transformStmt wm 0 code) precond postcond
+  Program name params (transformStmt wm code) precond postcond
 
-transformStmt :: WorldMap -> Int -> Statement -> Statement
-transformStmt wm lvl (Assignment tar (Func name paramExps)) =
+transformStmt :: WorldMap -> Statement -> Statement
+transformStmt wm (Assignment tar (Func name paramExps)) =
   Var freshVars $ Seq assignments $ Seq assBody $ Assignment tar (Ref rvName)
     where
       lookup = M.lookup name wm
       (ProgInfo progParams precond postcond) = fromMaybe (error "Invalid program/function call") lookup
-      rvName = "$RV$" ++ show lvl
-      paramVars = (map (dollarLvlVrbl lvl) progParams)
+      rvName = "$RV$"
+      paramVars = map dollarVrbl progParams
       freshVars = (Variable rvName intTy):paramVars
       assignmentsL = zipWith mkAssignment paramVars paramExps
-      assignments = chainSeqs assignmentsL Skip
-      precond' = dollarLvlExpr lvl precond
-      postcond' = dollarLvlExpr lvl postcond
+      assignments = seqs assignmentsL
+      precond' = dollarExpr precond
+      postcond' = dollarExpr postcond
       assBody = Seq (Assert precond') (Assume postcond')
 
-transformStmt wm lvl (Seq s1 s2) = Seq (transf s1) (transf s2)
-  where transf = transformStmt wm lvl
-transformStmt wm lvl (Square s1 s2) = Square (transf s1) (transf s2)
-  where transf = transformStmt wm lvl
-transformStmt wm lvl (While i g s) = While i g $ transformStmt wm lvl s
-transformStmt _ _ s = s
+transformStmt wm (Seq s1 s2) = Seq (transf s1) (transf s2)
+  where transf = transformStmt wm
+transformStmt wm (Square s1 s2) = Square (transf s1) (transf s2)
+  where transf = transformStmt wm
+transformStmt wm (While i g s) = While i g $ transformStmt wm s
+transformStmt wm (Var vars s) = Var vars $ transformStmt wm s
+transformStmt _ s = s
 
 intTy :: Type
 intTy = PrimitiveTy PTyInt
 
-dollarLvlVrbl :: Int -> Variable -> Variable
-dollarLvlVrbl lvl (Variable name ty) = Variable (name ++ "$" ++ show lvl) ty
+dollarVrbl :: Variable -> Variable
+dollarVrbl (Variable name ty) = Variable (name ++ "$") ty
 
 mkAssignment :: Variable -> Expression -> Statement
 mkAssignment (Variable name _) e = Assignment (Target name) e
 
-chainSeqs :: [Statement] -> Statement -> Statement
-chainSeqs []     = id
-chainSeqs (s:ss) = Seq s . chainSeqs ss
+seqs :: [Statement] -> Statement
+seqs (s:[]) = s
+seqs (s:ss) = Seq s $ seqs ss
+seqs []     = Skip
 
-dollarLvlExpr :: Int -> Expression -> Expression
-dollarLvlExpr lvl (Ref name) = Ref (name ++ "$" ++ show lvl)
-dollarLvlExpr lvl (ExpOp e1 op e2) = ExpOp (dollarLvlExpr lvl e1) op (dollarLvlExpr lvl e2)
-dollarLvlExpr lvl (Not e) = Not (dollarLvlExpr lvl e)
-dollarLvlExpr lvl (ArrAccess name idx) = ArrAccess (name ++ "$" ++ show lvl) (dollarLvlExpr lvl idx)
-dollarLvlExpr lvl (IfThenElse c e1 e2) = IfThenElse (dollarLvlExpr lvl c) (dollarLvlExpr lvl e1) (dollarLvlExpr lvl e2)
+dollarExpr :: Expression -> Expression
+dollarExpr (Ref name) = Ref (name ++ "$")
+dollarExpr (ExpOp e1 op e2) = ExpOp (dollarExpr e1) op (dollarExpr e2)
+dollarExpr (Not e) = Not (dollarExpr e)
+dollarExpr (ArrAccess name idx) = ArrAccess (name ++ "$") (dollarExpr idx)
+dollarExpr (IfThenElse c e1 e2) = IfThenElse (dollarExpr c) (dollarExpr e1) (dollarExpr e2)
+dollarExpr e = e
