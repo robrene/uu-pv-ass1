@@ -1,0 +1,26 @@
+{* i0<=i1 *}
+binsearch (array:[]int, i0:int, i1:int, x:int) {
+  var size:int, result:int in
+    size := i1-i0 ;
+    {
+      assert size>0 ;
+      var left:int, right:int, split:int in
+        split := (i1-i0)/2 ;
+        left := binsearch(array, i0, split, x) ;
+        right := binsearch(array, split, i1, x) ;
+        result := max(left, right) ;
+        return result
+      end
+    } [] {
+      assert size=0 ;
+      return array[i0]=x -> i0 | 0-1
+    }
+  end
+}
+{* ($RV>=0) => (array[$RV]=x) *}
+
+{* true *}
+max (a:int, b:int) {
+  return a>b -> a | b
+}
+{* ($RV>=a) and ($RV>=b) *}
