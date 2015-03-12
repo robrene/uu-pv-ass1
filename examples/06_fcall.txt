@@ -1,14 +1,14 @@
 {* true *}
-abs(x:int) {
+abs (x:int) {
   return x<0 -> 0-x | x
 }
 {* ((x=0) => ($RV=0)) and ((not x=0) => ($RV>0)) *}
 
-{* x < 0 *}
+{* x<0 *}
 main (x:int) {
   var y:int in
     y := abs(x) ;
     return y
   end
 }
-{* $RV > 0 *}
+{* $RV>0 *}

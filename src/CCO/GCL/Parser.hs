@@ -33,7 +33,6 @@ pProgram :: TokenParser Program
 pProgram = (\name params code -> Program name params code true true)
        <$> name <* spec '(' <*> manySepByComma pVariable <* spec ')'
        <*  spec '{' <*> pStatement <* spec '}'
-       <|> (\code -> Program "unnamed" [] code true true) <$> pStatement
        <|> (\precond name params code postcond -> Program name params code precond postcond)
        <$  spec '{' <* spec '*' <*> pExpression <* spec '*' <* spec '}'
        <*> name <* spec '(' <*> manySepByComma pVariable <* spec ')'
