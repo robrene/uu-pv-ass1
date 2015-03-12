@@ -25,7 +25,8 @@ imply x y       = ExpOp x OpImply y
 
 mkProgramWlp :: Expression -> Variables -> (Expression, [Expression]) -> Expression
 mkProgramWlp precond params (wlpCode, wlpVerifs) = foldr conjunct quantifiedWlp quantifiedExprs
-  where quantify e      = chainForalls params e
+  where rv              = Variable "$RV" (PrimitiveTy PTyInt)
+        quantify e      = chainForalls (rv:params) e
         quantifiedExprs = map quantify wlpVerifs
         quantifiedWlp   = quantify (imply precond wlpCode)
 
