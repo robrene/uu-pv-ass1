@@ -1,9 +1,8 @@
 {* x>0 *}
-main (x:int, rv:int) {
+main (x:int) {
   inv x>=0 while x>0 do {
     x := x - 1
   } ;
-  rv := x ;
-  return rv
+  return x
 }
-{* rv=0 *}
+{* $RV=0 *}
