@@ -1,8 +1,8 @@
-main (x:int, rv:int) {
+main (x:int) {
   assume x>0 ;
   inv x>=0 while x>0 do {
     x := x - 1
   } ;
-  rv := x;
-  assert rv=0
+  assert x=0 ;
+  return x
 }
